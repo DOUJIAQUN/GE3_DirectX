@@ -20,8 +20,10 @@
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MyMath.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DebugReporter.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -31,7 +33,9 @@
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="MyMath.h" />
     <ClInclude Include="ResourceObject.h" />
+    <ClInclude Include="Struct.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
