@@ -20,10 +20,13 @@
 #include <wrl.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#define DIRECTINPUT_VERSION    0x0800
+#include <dinput.h>
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #pragma comment (lib, "d3d12.lib")
 #pragma comment (lib, "dxgi.lib")
+#pragma comment(lib, "dinput8.lib")
 #pragma comment (lib, "dxguid.lib")
 #pragma comment (lib, "dxcompiler.lib")
 
@@ -434,7 +437,7 @@ Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(
 
 
 
-DirectX::ScratchImage LoadTexture(const std::string& filePath) 
+DirectX::ScratchImage LoadTexture(const std::string& filePath)
 {
 	// テクスチャファイルを読み込んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
@@ -595,7 +598,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 					elementIndices[element] = std::stoi(index);
 				}
 				// 要素へのIndexから、実際の要素の値を取得して、頂点を構築する
-				Vector4 position = positions[elementIndices [0]- 1];
+				Vector4 position = positions[elementIndices[0] - 1];
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
 				//VertexData vertex = { position,texcoord,normal };
@@ -619,7 +622,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 }
 
 struct D3DResourceLeakChecker {
-	~D3DResourceLeakChecker() 
+	~D3DResourceLeakChecker()
 	{
 		// リソースリークチェック
 		Microsoft::WRL::ComPtr<IDXGIDebug1> debug;
@@ -747,6 +750,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Log("complete create D3D12Device!!!\n");// 初期化完了のログをだす
 #pragma endregion
 
+	// DirectInputの初期化
+	IDirectInput8* directInput = nullptr;
+	hr = DirectInput8Create(
+		wc.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8,
+		(void**)&directInput, nullptr);
+	assert(SUCCEEDED(hr));
+
+	// キーボードデバイスの生成
+	IDirectInputDevice8* keyboard = nullptr;
+	hr = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
+	assert(SUCCEEDED(hr));
+
+	// 入力データ形式のセット
+	hr = keyboard->SetDataFormat(&c_dfDIKeyboard);
+	assert(SUCCEEDED(hr));
+
+	// 排他制御レベルのセット
+	hr = keyboard->SetCooperativeLevel(
+		hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	assert(SUCCEEDED(hr));
+
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue = nullptr;
 	if (SUCCEEDED(device->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
@@ -780,7 +804,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// コマンドキューの生成がうまくいかなかったので起動できない
 	assert(SUCCEEDED(hr));
 #pragma endregion
-	
+
 #pragma region CommandAllocator
 	// コマンドアロケータの生成
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator = nullptr;
@@ -1062,7 +1086,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directionalLightData->direction = light.direction;
 	directionalLightData->intensity = light.intensity;
 
-    /*// 頂点リソースを作る
+	/*// 頂点リソースを作る
 	float pi = float(M_PI);
 	// 球の分割数
 	const uint32_t kSubdivision = 160;
@@ -1148,7 +1172,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	// 頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData)* modelData.vertices.size());
+	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 
 	// Sprite用のリソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexRsourceSprite = CreateBufferResource(device, sizeof(VertexData) * 4);
@@ -1259,7 +1283,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.right = kClientWidth;
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
-	
+
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
 
@@ -1296,11 +1320,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-		}else {
+		}
+		else {
 
-		    ImGui_ImplDX12_NewFrame();
-		    ImGui_ImplWin32_NewFrame();
-		    ImGui::NewFrame();
+			// キーボード情報の取得開始
+			keyboard->Acquire();
+			// 全キーの入力状態を取得する
+			BYTE key[256] = {};
+			keyboard->GetDeviceState(sizeof(key), key);
+			if (key[DIK_0]) {
+				OutputDebugStringA("Hit 0\n");
+			}
+
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
 
 			// ゲーム処理
 			wvpData->World = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
@@ -1309,7 +1343,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 projectionMatrix = MakePrespectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrix = Multiply(wvpData->World, Multiply(viewMatrix, projectionMatrix));
 			wvpData->WVP = worldViewProjectionMatrix;
-	
+
 
 			// Sprite用のWorldViewProjecionMatrixを作る
 			transformationMatrixDataSprite->World = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
@@ -1338,10 +1372,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
 			ImGui::Checkbox("Enable Lighting", reinterpret_cast<bool*>(&materialData->enableLighting));
-				
+
 			ImGui::ColorEdit3("Color", (float*)&triangleColor); // 色を編集
 			ImGui::ColorEdit3("LightColor", (float*)&lightColor);
-			ImGui::SliderFloat3("LightDirectional",(float*) &lightDirection,-1.0f,1.0f);
+			ImGui::SliderFloat3("LightDirectional", (float*)&lightDirection, -1.0f, 1.0f);
 			ImGui::DragFloat("Intensity", &light.intensity, 0.01f);
 
 			ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
@@ -1394,7 +1428,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// 指定した震度で画面全体をクリアする
 			commandList->ClearDepthStencilView(dsvHadle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 			// 描画用のDescriptorHeapの設定
-			Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap.Get()};
+			Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap.Get() };
 			commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());
 			commandList->RSSetViewports(1, &viewport);
 			commandList->RSSetScissorRects(1, &scissorRect);
@@ -1425,7 +1459,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
 
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
-    		commandList->IASetIndexBuffer(&indexBufferViewSprite);// IBVを設定
+			commandList->IASetIndexBuffer(&indexBufferViewSprite);// IBVを設定
 			// TransformationMatrixCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
@@ -1443,13 +1477,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->ResourceBarrier(1, &barrier);
 
 
-			
+
 			// コマンドリストの内容を確定させる。すべてのコマンドを詰んでからCloseする
 			hr = commandList->Close();
 			assert(SUCCEEDED(hr));
 
 			// GPUにコマンドリストの実行を行わせる
-			Microsoft::WRL::ComPtr<ID3D12CommandList> commandLists[] = { commandList.Get()};
+			Microsoft::WRL::ComPtr<ID3D12CommandList> commandLists[] = { commandList.Get() };
 			commandQueue->ExecuteCommandLists(1, commandLists->GetAddressOf());
 			// GPUとosに画面王交換を行うよう通知する
 			swapChain->Present(1, 0);
@@ -1466,7 +1500,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				// イベントを待つ
 				WaitForSingleObject(fenceEvent, INFINITE);
 			}
-			
+
 			// 次のフレーム用のコマンドリストを準備
 			hr = commandAllocator->Reset();
 			assert(SUCCEEDED(hr));
@@ -1492,4 +1526,3 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	return 0;
 }
-
