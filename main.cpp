@@ -1100,7 +1100,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             DispatchMessageW(&msg);
         }
         else {
-
+            if (input->TriggerKey(DIK_0)) {
+                OutputDebugStringA("Hit 0\n");
+            }
             // ゲーム処理
             Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 
