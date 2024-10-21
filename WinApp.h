@@ -1,4 +1,3 @@
-
 #pragma once
 #include <Windows.h>
 #include <cstdint>
@@ -21,6 +20,8 @@ public:
 	void Initialize();
 	//更新
 	void Update();
+	//終了
+	void Finalize();
 
 	HWND GetHwnd() const { return hwnd; }
 	HINSTANCE GetHInstance()const { return wc.hInstance; }
