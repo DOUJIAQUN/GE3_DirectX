@@ -1096,13 +1096,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     MSG msg{};
     while (msg.message != WM_QUIT) {
  　　　　　
-        input->Update();
+       
         
         if (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessageW(&msg);
         }
         else {
+             input->Update();
+            
             if (input->TriggerKey(DIK_0)) {
                 OutputDebugStringA("Hit 0\n");
             }
