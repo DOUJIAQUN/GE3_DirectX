@@ -1095,6 +1095,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     MSG msg{};
     while (msg.message != WM_QUIT) {
+
+        input->Update();
+
         if (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessageW(&msg);
@@ -1233,7 +1236,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
                 commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
             }
 
-            input->Update();
+          
 
             // ImGuiの新しいフレームを開始する
             ImGui_ImplDX12_NewFrame();
