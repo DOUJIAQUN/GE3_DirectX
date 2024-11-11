@@ -21,6 +21,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyMath.cpp" />
+    <ClCompile Include="WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugReporter.h" />
@@ -36,6 +37,7 @@
     <ClInclude Include="MyMath.h" />
     <ClInclude Include="ResourceObject.h" />
     <ClInclude Include="Struct.h" />
+    <ClInclude Include="WinApp.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
