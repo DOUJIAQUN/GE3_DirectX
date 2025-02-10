@@ -59,9 +59,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
         dxCommon->RenderImGui();
 
-        dxCommon->End();
-   }
-    dxCommon->Finalize();
+            ImGui::End();
+            // ImGuiの描画データをレンダリングする
+            ImGui::Render();
+            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
+            dxCommon->End();
+        }
+    }
+
+    ImGui_ImplDX12_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+
     delete input;
     winApp->Finalize();
 
