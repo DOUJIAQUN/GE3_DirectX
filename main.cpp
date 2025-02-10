@@ -23,21 +23,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     WinApp* winApp = nullptr;
     DirectXCommon* dxCommon = nullptr;
-    Input* input = nullptr;
+	Input* input = nullptr;
 
     //Windowの生成
     winApp = new WinApp();
     winApp->Initialize();
 
     // DX初期化
-    dxCommon = new DirectXCommon;
-    dxCommon->Initialize(winApp);
+	dxCommon = new DirectXCommon;
+	dxCommon->Initialize(winApp);
 
-    // 入力初期化
-    input = new Input();
-    input->Initialize(winApp);
+	// 入力初期化
+	input = new Input();
+	input->Initialize(winApp);
 
-
+    
     while (true) {
         if (winApp->ProcessMessage()) {
             //ゲームループを抜ける
@@ -45,37 +45,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         }
         input->Update();
 
-
-        dxCommon->BeginImGui();
-        ImGui::Begin("Settings");
-
-
-
-        ImGui::End();
-        ImGui::Render();
-
+        
         dxCommon->Begin();
+        dxCommon->BeginImGui();
 
+		ImGui::Begin("Settings");
+        	
 
+		
+		ImGui::End();
+		ImGui::Render();
+
+        
+
+       
         dxCommon->RenderImGui();
 
-            ImGui::End();
-            // ImGuiの描画データをレンダリングする
-            ImGui::Render();
-            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
-            dxCommon->End();
-        }
+        dxCommon->End();
     }
-
-    ImGui_ImplDX12_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
-
+    dxCommon->RenderImGui();
     delete input;
     winApp->Finalize();
-
+   
     delete winApp;
     delete dxCommon;
 
-    return 0;
+	return 0;
 }

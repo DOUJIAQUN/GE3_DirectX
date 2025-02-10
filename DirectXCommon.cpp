@@ -4,12 +4,6 @@
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #include "Logger.h"
-#include "StringUtility.h"#include "DirectXCommon.h"
-#include <cassert>
-#include <format>
-#pragma comment(lib,"d3d12.lib")
-#pragma comment(lib,"dxgi.lib")
-#include "Logger.h"
 #include "StringUtility.h"
 
 
