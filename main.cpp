@@ -809,7 +809,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
             dxCommon->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
             dxCommon->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
-            ID3D12DescriptorHeap* descriptorHeaps[] = { dxCommon->GetSrvDescriptorHeap() };
+            ID3D12DescriptorHeap* descriptorHeaps[] = { dxCommon->GetSrvDescriptorHeap().Get() };
             dxCommon->GetCommandList()->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
             // 3D球
             if (showSphere) {
@@ -936,12 +936,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
             ImGui::End();
             // ImGuiの描画データをレンダリングする
             ImGui::Render();
-            ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), dxCommon->GetCommandList());
+            dxCommon->RenderImGui();
             dxCommon->End();
         }
     }
 
-   dxCommon->Finalize();
+    dxCommon->Finalize();
 
     delete input;
     winApp->Finalize();
