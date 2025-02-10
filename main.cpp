@@ -46,7 +46,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         input->Update();
 
         
-		ImGui_ImplDX12_NewFrame();
+	/*	ImGui_ImplDX12_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 		ImGui::Begin("Settings");
@@ -54,11 +54,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		
 		ImGui::End();
-		ImGui::Render();
+		ImGui::Render();*/
+        
 
         dxCommon->Begin();
+        dxCommon->BeginImGui();
 
-       
+
+
         dxCommon->RenderImGui();
 
         dxCommon->End();
