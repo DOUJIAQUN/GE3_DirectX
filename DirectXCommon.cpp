@@ -6,6 +6,7 @@
 #include "Logger.h"
 #include "StringUtility.h"
 
+
 using namespace Microsoft::WRL;
 using namespace Logger;
 using namespace StringUtility;
