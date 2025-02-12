@@ -154,7 +154,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
     D3DResourceLeakChecker leakCheck;
 
-    CoInitializeEx(0, COINIT_MULTITHREADED);
+    //CoInitializeEx(0, COINIT_MULTITHREADED);
 
     WinApp* winApp = nullptr;
     DirectXCommon* dxCommon = nullptr;
