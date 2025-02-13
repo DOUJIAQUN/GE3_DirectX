@@ -533,10 +533,15 @@ Microsoft::WRL::ComPtr<IDxcBlob> DirectXCommon::CompileShader(const std::wstring
 
 	//4.Compile結果を受け取って返す
 	//コンパイル結果から実行用のバイナリ部分を取得
-	IDxcBlob* shaderBlob = nullptr;
-	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
+//	IDxcBlob* shaderBlob = nullptr;
+//	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
+//	assert(SUCCEEDED(hr));
+//	//成功したログを出す
+//	Logger::Log(StringUtility::ConvertString(std::format(L"Compile Succeeded,path:{},profile:{}\n", filePath, profile)));
+//	return shaderBlob;
+	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob;  
+	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(shaderBlob.GetAddressOf()), nullptr);
 	assert(SUCCEEDED(hr));
-	//成功したログを出す
 	Logger::Log(StringUtility::ConvertString(std::format(L"Compile Succeeded,path:{},profile:{}\n", filePath, profile)));
 	return shaderBlob;
 }
