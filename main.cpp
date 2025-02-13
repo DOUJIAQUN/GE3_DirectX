@@ -135,6 +135,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         for (Sprite* sprite : sprites) {
             sprite->Draw();
         }
+
         dxCommon->RenderImGui();
         dxCommon->End();
     }

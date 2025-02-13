@@ -470,10 +470,15 @@ Microsoft::WRL::ComPtr<IDxcBlob> DirectXCommon::CompileShader(const std::wstring
 {
 	Log(ConvertString(std::format(L"Begin CompileShader, path:{}, profile:{}\n", filePath, profile)));
 
-	IDxcBlobEncoding* shaderSource = nullptr;
-	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
-	//読めなかったら止める
+	//IDxcBlobEncoding* shaderSource = nullptr;
+	//HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
+	////読めなかったら止める
+	//assert(SUCCEEDED(hr));
+
+	Microsoft::WRL::ComPtr<IDxcBlobEncoding> shaderSource;
+	hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	assert(SUCCEEDED(hr));
+
 	//読み込んだファイルの内容を設定する
 	DxcBuffer shaderSourceBuffer;
 	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
@@ -489,23 +494,39 @@ Microsoft::WRL::ComPtr<IDxcBlob> DirectXCommon::CompileShader(const std::wstring
 		L"-Od",//最適化を外しておく
 		L"-Zpr",//メモリレイアウトは行優先
 	};
-	//実際にShaderをコンパイルする
-	IDxcResult* shaderResult = nullptr;
+
+	////実際にShaderをコンパイルする
+	//IDxcResult* shaderResult = nullptr;
+	//hr = dxcCompiler->Compile(
+	//	&shaderSourceBuffer,//読み込んだファイル
+	//	arguments,          //コンパイルオプション
+	//	_countof(arguments), //コンパイルオプションの数
+	//	includeHandler.Get(),      //includeが含まれた諸々
+	//	IID_PPV_ARGS(&shaderResult)//コンパイル結果
+	//);
+	////コンパイルエラーではなくdxcが起動できないなど致命的な状況
+	//assert(SUCCEEDED(hr));
+
+	Microsoft::WRL::ComPtr<IDxcResult> shaderResult;
 	hr = dxcCompiler->Compile(
-		&shaderSourceBuffer,//読み込んだファイル
-		arguments,          //コンパイルオプション
-		_countof(arguments), //コンパイルオプションの数
-		includeHandler.Get(),      //includeが含まれた諸々
-		IID_PPV_ARGS(&shaderResult)//コンパイル結果
+		&shaderSourceBuffer, arguments, _countof(arguments),
+		includeHandler.Get(), IID_PPV_ARGS(&shaderResult)
 	);
-	//コンパイルエラーではなくdxcが起動できないなど致命的な状況
 	assert(SUCCEEDED(hr));
 
-	//3.警告・エラーがでていないか確認する
-	//警告・エラーが出てたらログに出して止める
-	IDxcBlobUtf8* shaderError = nullptr;
-	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
-	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
+	////3.警告・エラーがでていないか確認する
+	////警告・エラーが出てたらログに出して止める
+	//IDxcBlobUtf8* shaderError = nullptr;
+	//shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
+	//if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
+	//	Logger::Log(shaderError->GetStringPointer());
+	//	assert(false);
+	//}
+	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError;
+	assert(shaderResult != nullptr);
+	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(shaderError.GetAddressOf()), nullptr);
+	
+	if (shaderError && shaderError->GetStringLength() != 0) {
 		Logger::Log(shaderError->GetStringPointer());
 		assert(false);
 	}
